@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Schedule</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', sans-serif;
+            background: #f5f8fa;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .subject-form {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .subject-form input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .subject-form button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .subject-form button:hover {
+            background: #2980b9;
+        }
+
+        .subject-list {
+            display: grid;
+            gap: 20px;
+        }
+
+        .subject-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .subject-info {
+            flex: 1;
+        }
+
+        .subject-name {
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .time-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .time-input input {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .time-input button {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .time-input button:hover {
+            background: #219653;
+        }
+
+        .total-time {
+            margin-top: 30px;
+            padding: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Study Time Tracker</h1>
+        
+        <div class="subject-form">
+            <input type="text" id="subject-name" placeholder="Enter subject name">
+            <button onclick="addSubject()">Add Subject</button>
+        </div>
+
+        <div class="subject-list" id="subject-list">
+            <!-- Subjects will be added here dynamically -->
+        </div>
+
+        <div class="total-time">
+            <h3>Total Study Time: <span id="total-time">0</span> hours</h3>
+        </div>
+    </div>
+
+    <script>
+        let subjects = [];
+        let totalTime = 0;
+
+        function addSubject() {
+            const subjectName = document.getElementById('subject-name').value.trim();
+            if (subjectName) {
+                const subject = {
+                    name: subjectName,
+                    time: 0
+                };
+                subjects.push(subject);
+                renderSubjects();
+                document.getElementById('subject-name').value = '';
+            }
+        }
+
+        function updateTime(index, hours) {
+            if (!isNaN(hours) && hours >= 0) {
+                subjects[index].time = parseFloat(hours);
+                calculateTotalTime();
+            }
+        }
+
+        function calculateTotalTime() {
+            totalTime = subjects.reduce((sum, subject) => sum + subject.time, 0);
+            document.getElementById('total-time').textContent = totalTime.toFixed(1);
+        }
+
+        function renderSubjects() {
+            const subjectList = document.getElementById('subject-list');
+            subjectList.innerHTML = subjects.map((subject, index) => `
+                <div class="subject-card">
+                    <div class="subject-info">
+                        <div class="subject-name">${subject.name}</div>
+                        <div>Time Spent: ${subject.time} hours</div>
+                    </div>
+                    <div class="time-input">
+                        <input type="number" 
+                               value="${subject.time}" 
+                               onchange="updateTime(${index}, this.value)"
+                               min="0"
+                               step="0.5">
+                        <button onclick="updateTime(${index}, this.previousElementSibling.value)">Update</button>
+                        <input type="number" 
+                               id="timer-duration-${index}" 
+                               placeholder="Duration (min)" 
+                               min="1"
+                               style="width: 100px;">
+                        <button onclick="startTimer(${index})" style="background: #e67e22;">Start Timer</button>
+                        <div class="timer-display" id="timer-display-${index}" style="margin-left: 10px; font-weight: bold; display: none;">
+                            Time Left: <span id="timer-value-${index}">00:00</span>
+                        </div>
+                    </div>
+
+
+                </div>
+            `).join('');
+        }
+
+        // Initial render
+        renderSubjects();
+
+        function startTimer(index) {
+            const durationInput = document.getElementById(`timer-duration-${index}`);
+            const duration = durationInput.value;
+            if (duration && !isNaN(duration) && duration > 0) {
+                let timeLeft = duration * 60; // Convert to seconds
+                const timerDisplay = document.getElementById(`timer-display-${index}`);
+                const timerValue = document.getElementById(`timer-value-${index}`);
+                
+                timerDisplay.style.display = 'block';
+                
+                const timerInterval = setInterval(() => {
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        alert(`Time is up for ${subjects[index].name}!`);
+                        timerDisplay.style.display = 'none';
+                    } else {
+                        const minutes = Math.floor(timeLeft / 60);
+                        const seconds = timeLeft % 60;
+                        timerValue.textContent = 
+                            `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                        timeLeft--;
+                    }
+                }, 1000);
+                durationInput.disabled = true;
+            } else {
+                alert('Please enter a valid duration in minutes');
+            }
+        }
+
+    </script>
+
+</body>
+</html>

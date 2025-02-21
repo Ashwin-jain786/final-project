@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz Download</title>
+    <style>
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .success-message {
+            color: green;
+            display: none;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+        <h1>Download Quiz</h1>
+        <p>Download quiz for a specific class and subject.</p>
+    <div id="quiz-download-form">
+        <label for="class">Class:</label>
+        <select id="class" name="class">
+            <option value="" disabled selected>Select Class</option>
+            <option value="Class 1">Class 1</option>
+            <option value="Class 2">Class 2</option>
+            <!-- Add more class options -->
+        </select>
+    
+        <label for="subject">Subject:</label>
+        <select id="subject" name="subject">
+            <option value="" disabled selected>Select Subject</option>
+            <option value="Math">Math</option>
+            <option value="Science">Science</option>
+            <!-- Add more subject options -->
+        </select>
+    
+        <button id="download-quiz-button">Download Quiz</button>
+        <div class="loading-spinner" id="loading-spinner"></div>
+        <p id="error-message" style="color: red; display: none;"></p>
+        <p id="success-message" class="success-message">Download successful!</p>
+    </div>
+
+    <script>document.getElementById('download-quiz-button').addEventListener('click', function() {
+        const selectedClass = document.getElementById('class').value;
+        const selectedSubject = document.getElementById('subject').value;
+        const errorMessage = document.getElementById('error-message');
+    
+        // Basic client-side validation
+        if (!selectedClass || !selectedSubject) {
+            errorMessage.textContent = "Please select both class and subject.";
+            errorMessage.style.display = "block";
+            return;
+        }
+    
+        errorMessage.style.display = "none";
+        document.getElementById('success-message').style.display = 'none';
+        document.getElementById('loading-spinner').style.display = 'block';
+
+    
+        // Send AJAX request to the backend
+        fetch('/get_quiz_pdf', { // Replace with your backend endpoint
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ class: selectedClass, subject: selectedSubject })
+        })
+        .then(response => {
+            if (!response.ok) {
+                // Handle HTTP errors (e.g., 404, 500)
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.blob(); // Get the response as a Blob (for PDF download)
+        })
+        .then(blob => {
+            // Create a download link
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+    
+            //Suggest a filename (you'll probably want to derive this from backend)
+            //but here's a simple version for demonstration
+            a.download = `${selectedClass.replace(/\s/g, '_')}_${selectedSubject.replace(/\s/g, '_')}_quiz.pdf`; //suggested filename
+    
+            document.body.appendChild(a);
+            a.click();
+            a.remove(); // Clean up the link
+            window.URL.revokeObjectURL(url);
+            document.getElementById('loading-spinner').style.display = 'none';
+            document.getElementById('success-message').style.display = 'block';
+
+        })
+        .catch(error => {
+            console.error('Error fetching quiz:', error);
+            errorMessage.textContent = "Quiz not found or an error occurred.  Please check your selections.";
+            errorMessage.style.display = "block";
+        });
+    });</script>
+</body>
+</html>

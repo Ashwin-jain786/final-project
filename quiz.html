@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Class-wise Quiz</title>
+    <style>
+        .quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .selectors {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .selector-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .subject-card {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .subject-card:hover {
+            background-color: #f5f5f5;
+            transform: translateY(-2px);
+        }
+        .question {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .score {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .download-section {
+            margin-top: 30px;
+            padding: 20px;
+            border-top: 1px solid #ddd;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .success-message {
+            color: green;
+            display: none;
+            margin-top: 10px;
+        }
+        .error-message {
+            color: red;
+            display: none;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>Class-wise Quiz</h1>
+        
+        <div class="selectors">
+            <div class="selector-group">
+                <label for="class">Select Class:</label>
+                <select id="class" onchange="updateSubjects()">
+                    <option value="1">Class 1</option>
+                    <option value="2">Class 2</option>
+                    <option value="3">Class 3</option>
+                    <option value="4">Class 4</option>
+                    <option value="5">Class 5</option>
+                    <option value="6">Class 6</option>
+                    <option value="7">Class 7</option>
+                    <option value="8">Class 8</option>
+                    <option value="9">Class 9</option>
+                    <option value="10">Class 10</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="subject-grid" id="subject-grid"></div>
+
+        <div id="quiz-content"></div>
+        <div class="score">Score: <span id="score">0</span></div>
+
+        <div class="download-section">
+            <h2>Download Quiz PDF</h2>
+            <div class="selectors">
+                <div class="selector-group">
+                    <label for="download-class">Class:</label>
+                    <select id="download-class" onchange="updateDownloadSubjects()">
+                        <option value="1">Class 1</option>
+                        <option value="2">Class 2</option>
+                        <option value="3">Class 3</option>
+                        <option value="4">Class 4</option>
+                        <option value="5">Class 5</option>
+                        <option value="6">Class 6</option>
+                        <option value="7">Class 7</option>
+                        <option value="8">Class 8</option>
+                        <option value="9">Class 9</option>
+                        <option value="10">Class 10</option>
+                    </select>
+                </div>
+                <div class="selector-group">
+                    <label for="download-subject">Subject:</label>
+                    <select id="download-subject"></select>
+                </div>
+            </div>
+            <button id="download-quiz-button">Download Quiz</button>
+            <div class="loading-spinner" id="download-spinner"></div>
+            <p class="success-message" id="download-success">Download successful!</p>
+            <p class="error-message" id="download-error"></p>
+        </div>
+    </div>
+
+    <script>
+        const subjectsByClass = {
+            1: ["English", "Math", "EVS"],
+            2: ["English", "Math", "EVS"],
+            3: ["English", "Math", "Science", "Social Studies"],
+            4: ["English", "Math", "Science", "Social Studies"],
+            5: ["English", "Math", "Science", "Social Studies"],
+            6: ["English", "Math", "Science", "Social Studies"],
+            7: ["English", "Math", "Physics", "Chemistry", "Biology", "History", "Geography"],
+            8: ["English", "Math", "Physics", "Chemistry", "Biology", "History", "Geography"],
+            9: ["English", "Math", "Physics", "Chemistry", "Biology", "History", "Geography"],
+            10: ["English", "Math", "Physics", "Chemistry", "Biology", "History", "Geography"]
+        };
+
+        const subjectDetails = {
+            "English": "Improve your language skills",
+            "Math": "Practice problem solving",
+            "EVS": "Learn about environment",
+            "Science": "Explore scientific concepts",
+            "Social Studies": "Understand society and history",
+            "Physics": "Discover laws of nature",
+            "Chemistry": "Study matter and its properties",
+            "Biology": "Learn about living organisms",
+            "History": "Explore past events",
+            "Geography": "Understand Earth's features"
+        };
+
+        function updateSubjects() {
+            const classSelect = document.getElementById('class');
+            const subjectGrid = document.getElementById('subject-grid');
+            const selectedClass = classSelect.value;
+            
+            const subjects = subjectsByClass[selectedClass];
+            subjectGrid.innerHTML = subjects
+                .map(subject => `
+                    <div class="subject-card" onclick="loadQuiz('${selectedClass}_${subject}')">
+                        <h3>${subject}</h3>
+                        <p>${subjectDetails[subject]}</p>
+                    </div>
+                `)
+                .join('');
+        }
+
+        function updateDownloadSubjects() {
+            const classSelect = document.getElementById('download-class');
+            const subjectSelect = document.getElementById('download-subject');
+            const selectedClass = classSelect.value;
+            
+            const subjects = subjectsByClass[selectedClass];
+            subjectSelect.innerHTML = subjects
+                .map(subject => `<option value="${subject}">${subject}</option>`)
+                .join('');
+        }
+
+        async function fetchQuestions(classLevel, subject) {
+            try {
+                const response = await fetch('/generate_questions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        class: classLevel,
+                        subject: subject
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch questions');
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching questions:', error);
+                return [];
+            }
+        }
+
+        document.getElementById('download-quiz-button').addEventListener('click', function() {
+            const selectedClass = document.getElementById('download-class').value;
+            const selectedSubject = document.getElementById('download-subject').value;
+            const errorMessage = document.getElementById('download-error');
+            const successMessage = document.getElementById('download-success');
+            const spinner = document.getElementById('download-spinner');
+
+            // Basic validation
+            if (!selectedClass || !selectedSubject) {
+                errorMessage.textContent = "Please select both class and subject.";
+                errorMessage.style.display = "block";
+                return;
+            }
+
+            // Reset messages and show spinner
+            errorMessage.style.display = "none";
+            successMessage.style.display = "none";
+            spinner.style.display = "block";
+
+            // Send download request
+            fetch('/get_quiz_pdf', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    class: selectedClass, 
+                    subject: selectedSubject 
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${selectedClass}_${selectedSubject}_quiz.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+
+                // Show success message
+                spinner.style.display = "none";
+                successMessage.style.display = "block";
+            })
+            .catch(error => {
+                console.error('Error downloading quiz:', error);
+                spinner.style.display = "none";
+                errorMessage.textContent = "Quiz not found or an error occurred. Please check your selections.";
+                errorMessage.style.display = "block";
+            });
+        });
+
+        let currentScore = 0;
+
+        async function loadQuiz(subjectKey) {
+            const [classLevel, subject] = subjectKey.split('_');
+            const quizContent = document.getElementById('quiz-content');
+            
+            // Show loading state
+            quizContent.innerHTML = '<p>Loading questions...</p>';
+            currentScore = 0;
+            document.getElementById('score').textContent = currentScore;
+
+            try {
+                const quiz = await fetchQuestions(classLevel, subject);
+                quizContent.innerHTML = '';
+
+                quiz.forEach((q, index) => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'question';
+                    questionDiv.innerHTML = `
+                        <p>${index + 1}. ${q.question}</p>
+                        <div class="options">
+                            ${q.options.map(opt => `
+                                <label>
+                                    <input type="radio" name="q${index}" value="${opt}">
+                                    ${opt}
+                                </label><br>
+                            `).join('')}
+                        </div>
+                        <button onclick="checkAnswer(${index}, '${subject}')">Submit Answer</button>
+                        <p class="result" id="result${index}"></p>
+                    `;
+                    quizContent.appendChild(questionDiv);
+                });
+            } catch (error) {
+                quizContent.innerHTML = '<p>Error loading questions. Please try again.</p>';
+            }
+        }
+
+        function checkAnswer(questionIndex, subject) {
+            const selected = document.querySelector(`input[name="q${questionIndex}"]:checked`);
+            const result = document.getElementById(`result${questionIndex}`);
+            
+            if (!selected) {
+                result.textContent = "Please select an answer!";
+                result.style.color = "red";
+                return;
+            }
+
+            const correctAnswer = questionBanks[subject][questionIndex].answer;
+            if (selected.value === correctAnswer) {
+                result.textContent = "Correct!";
+                result.style.color = "green";
+                currentScore++;
+            } else {
+                result.textContent = `Incorrect! The correct answer is ${correctAnswer}`;
+                result.style.color = "red";
+            }
+
+            document.getElementById('score').textContent = currentScore;
+        }
+
+        // Initialize
+        updateSubjects();
+        updateDownloadSubjects();
+    </script>
+</body>
+</html>

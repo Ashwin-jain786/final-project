@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weaknesses Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(-45deg, #1e3c72, #2a5298, #1c1c3d, #0f0f23);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .weaknesses-container {
+            margin-top: 80px;
+            display: flex;
+            flex-direction: column;
+            width: 600px;
+            height: 700px;
+            margin: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        .weaknesses-header {
+            background: rgba(0, 120, 255, 0.2);
+            padding: 15px;
+            text-align: center;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .weaknesses-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin: 10px;
+            scroll-behavior: smooth;
+        }
+
+        .nav-button {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 50%;
+            width: 75px;
+            height: 75px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .header div {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .logout-button {
+            background-color: #f44336;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" style="height: 40px; margin-right: 20px;">
+            <button class="nav-button" onclick="window.location.href='/quiz'">Quiz</button>
+            <button class="nav-button" onclick="window.location.href='/profile'">Profile</button>
+            <button class="nav-button" onclick="window.location.href='/schedule'">Schedule</button>
+            <button class="nav-button" onclick="window.location.href='/weaknesses'">Weaknesses</button>
+        </div>
+        <button class="logout-button" onclick="window.location.href='/logout'">Logout</button>
+    </div>
+
+    <div class="weaknesses-container">
+        <div class="weaknesses-header">
+            <h2>Weaknesses Analysis</h2>
+        </div>
+        <div class="weaknesses-content">
+            <!-- Weakness items will be added here -->
+            <div class="weakness-item">
+                <h3>Mathematics</h3>
+                <p>Algebra: 65% accuracy</p>
+                <p>Geometry: 70% accuracy</p>
+            </div>
+            <div class="weakness-item">
+                <h3>Science</h3>
+                <p>Physics: 75% accuracy</p>
+                <p>Chemistry: 80% accuracy</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
