@@ -155,7 +155,7 @@ def save_result():
         return standardize_response('error', 'Internal server error', status_code=500)
 
 # Gemini AI Configuration
-GOOGLE_API_KEY = "AIzaSyCaQ8TCqP0cRp4PNcU1XFugHnT8spMTXJA"
+GOOGLE_API_KEY = "
 os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 # Initialize both text and vision models
